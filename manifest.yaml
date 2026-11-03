@@ -1,0 +1,41 @@
+version: 0.1.0
+type: plugin
+author: kuronurikun
+name: kuronurikun
+label:
+  en_US: Kuronuri-kun (Japanese PII Masking)
+  ja_JP: 個人情報黒塗りくん
+  zh_Hans: Kuronuri-kun（日语个人信息脱敏）
+description:
+  en_US: Detect and mask personal information in Japanese text (names, addresses, phone numbers, My Number, bank accounts) before sending it to an LLM, then restore the original values in the answer.
+  ja_JP: 日本語の文章から氏名・住所・電話番号・マイナンバー・口座番号などの個人情報を見つけて伏せ、LLMの回答を元の値に戻します。
+  zh_Hans: 在发送给大模型之前，检测并遮蔽日语文本中的个人信息（姓名、地址、电话号码、个人编号、银行账户），并在回答中恢复原始值。
+icon: icon.svg
+created_at: '2026-11-03T00:00:00.000000000Z'
+privacy: PRIVACY.md
+repo: https://github.com/mamoruveilworks-hub/kuronurikun-dify-plugin
+contact: support@kuronurikun.com
+resource:
+  memory: 268435456
+  permission:
+    tool:
+      enabled: true
+plugins:
+  tools:
+    - provider/kuronurikun.yaml
+meta:
+  version: 0.0.1
+  arch:
+    - amd64
+    - arm64
+  runner:
+    language: python
+    version: '3.12'
+    entrypoint: main
+  minimum_dify_version: 1.5.0
+tags:
+  - utilities
+  - productivity
+network:
+  domains:
+    - kuronurikun.com

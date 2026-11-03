@@ -1,0 +1,88 @@
+identity:
+  name: mask_pii
+  author: kuronurikun
+  label:
+    en_US: Mask personal information
+    ja_JP: 個人情報を伏せる
+    zh_Hans: 遮蔽个人信息
+description:
+  human:
+    en_US: Replace personal information in Japanese text with placeholders such as [PERSON_1]. Put this step before the LLM, and use mapping_token with "Restore personal information" afterwards.
+    ja_JP: 日本語の文章の個人情報を [PERSON_1] のような記号に置き換えます。LLMの前に置き、あとで mapping_token を「個人情報を元に戻す」に渡します。
+    zh_Hans: 将日语文本中的个人信息替换为 [PERSON_1] 等占位符。请放在大模型之前，之后把 mapping_token 交给"恢复个人信息"。
+  llm: Masks personal information (names, addresses, phone numbers, emails, My Number, bank accounts, credit cards, dates of birth) in Japanese text and returns the masked text and a mapping_token to restore it later.
+parameters:
+  - name: text
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Text
+      ja_JP: 文章
+      zh_Hans: 文本
+    human_description:
+      en_US: The text to mask (up to 100,000 characters)
+      ja_JP: 伏せたい文章（最大10万文字）
+      zh_Hans: 要遮蔽的文本（最多 10 万字符）
+    llm_description: The text that may contain personal information
+  - name: style
+    type: select
+    required: false
+    default: tag
+    form: form
+    label:
+      en_US: Masking style
+      ja_JP: 伏せ方
+      zh_Hans: 遮蔽方式
+    human_description:
+      en_US: tag can be restored later; the others cannot
+      ja_JP: tag は元に戻せます。それ以外は戻せません
+      zh_Hans: tag 可以恢复，其他方式无法恢复
+    options:
+      - value: tag
+        label:
+          en_US: Placeholder [PERSON_1] (restorable)
+          ja_JP: 記号 [PERSON_1]（元に戻せる）
+          zh_Hans: 占位符 [PERSON_1]（可恢复）
+      - value: block
+        label:
+          en_US: Black boxes ■■■■
+          ja_JP: 黒塗り ■■■■
+          zh_Hans: 黑块 ■■■■
+      - value: asterisk
+        label:
+          en_US: Asterisks ****
+          ja_JP: アスタリスク ****
+          zh_Hans: 星号 ****
+      - value: redact
+        label:
+          en_US: "[個人情報] label"
+          ja_JP: 「[個人情報]」に置き換え
+          zh_Hans: 替换为 [個人情報]
+  - name: extra_entities
+    type: string
+    required: false
+    form: form
+    label:
+      en_US: Additional types
+      ja_JP: 追加で伏せる種類
+      zh_Hans: 额外类型
+    human_description:
+      en_US: "Comma-separated, optional: AGE, GENDER, COMPANY, CARD_EXPIRY"
+      ja_JP: "カンマ区切り（任意）：AGE（年齢）, GENDER（性別）, COMPANY（会社名）, CARD_EXPIRY（カードの有効期限）"
+      zh_Hans: "逗号分隔（可选）：AGE, GENDER, COMPANY, CARD_EXPIRY"
+output_schema:
+  type: object
+  properties:
+    masked_text:
+      type: string
+      description: Text with personal information replaced
+    mapping_token:
+      type: string
+      description: Encrypted token used by "Restore personal information" (style=tag only, valid for 24 hours, same API key only)
+    entity_count:
+      type: integer
+      description: Number of personal information items found
+extra:
+  python:
+    source: tools/mask_pii.py
