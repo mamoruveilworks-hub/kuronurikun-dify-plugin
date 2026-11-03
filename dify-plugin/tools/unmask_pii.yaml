@@ -1,0 +1,49 @@
+identity:
+  name: unmask_pii
+  author: kuronurikun
+  label:
+    en_US: Restore personal information
+    ja_JP: 個人情報を元に戻す
+    zh_Hans: 恢复个人信息
+description:
+  human:
+    en_US: Replace placeholders such as [PERSON_1] in the text (for example, the LLM's answer) with the original values, using the mapping_token from "Mask personal information".
+    ja_JP: 文章（LLMの回答など）に含まれる [PERSON_1] などの記号を、「個人情報を伏せる」の mapping_token を使って元の値に戻します。
+    zh_Hans: 使用"遮蔽个人信息"返回的 mapping_token，将文本（例如大模型的回答）中的 [PERSON_1] 等占位符恢复为原始值。
+  llm: Restores placeholders such as [PERSON_1] in a text to the original values using a mapping_token.
+parameters:
+  - name: text
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: Text
+      ja_JP: 文章
+      zh_Hans: 文本
+    human_description:
+      en_US: Text containing placeholders, such as the LLM's answer
+      ja_JP: 記号を含む文章（LLMの回答など）
+      zh_Hans: 包含占位符的文本（例如大模型的回答）
+    llm_description: Text that contains placeholders such as [PERSON_1]
+  - name: mapping_token
+    type: string
+    required: true
+    form: llm
+    label:
+      en_US: mapping_token
+      ja_JP: mapping_token
+      zh_Hans: mapping_token
+    human_description:
+      en_US: The mapping_token output of "Mask personal information"
+      ja_JP: 「個人情報を伏せる」が出力した mapping_token
+      zh_Hans: 「遮蔽个人信息」输出的 mapping_token
+    llm_description: The mapping_token returned by mask_pii
+output_schema:
+  type: object
+  properties:
+    text:
+      type: string
+      description: Text with placeholders restored to the original values
+extra:
+  python:
+    source: tools/unmask_pii.py
