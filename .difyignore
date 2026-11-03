@@ -1,8 +1,16 @@
+# Files that must not go into the .difypkg package.
+# Git metadata (the plugin is usually packaged from its own Git repository)
+.git/
+.github/
+.gitignore
+# Local settings and keys (remote debug key)
 .env
+# Python environments and caches
 .venv/
 venv/
 __pycache__/
 *.pyc
 .pytest_cache/
+# Tests and build outputs
 tests/
 *.difypkg
