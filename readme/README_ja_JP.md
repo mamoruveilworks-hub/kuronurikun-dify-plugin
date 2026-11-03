@@ -28,7 +28,7 @@
 | ツール | 入力 | 出力 |
 |---|---|---|
 | 個人情報を伏せる（`mask_pii`） | `text`、`style`（tag / block / asterisk / redact）、`extra_entities`（任意：AGE, GENDER, COMPANY, CARD_EXPIRY） | `masked_text`、`mapping_token`、`entity_count` |
-| 個人情報を元に戻す（`unmask_pii`） | `text`、`mapping_token` | `text` |
+| 個人情報を元に戻す（`unmask_pii`） | `text`、`mapping_token` | `restored_text` |
 
 ### チャットフローの例
 
@@ -37,7 +37,7 @@
   → 個人情報を伏せる   （text = sys.query）
   → LLM               （ユーザーのプロンプト = 伏せる.masked_text）
   → 個人情報を元に戻す （text = LLM.text、mapping_token = 伏せる.mapping_token）
-  → 回答               （元に戻す.text）
+  → 回答               （元に戻す.restored_text）
 ```
 
 注意：

@@ -30,7 +30,7 @@ The plugin provides two tools.
 | Tool | Inputs | Outputs |
 |---|---|---|
 | Mask personal information (`mask_pii`) | `text`, `style` (tag / block / asterisk / redact), `extra_entities` (optional: AGE, GENDER, COMPANY, CARD_EXPIRY) | `masked_text`, `mapping_token`, `entity_count` |
-| Restore personal information (`unmask_pii`) | `text`, `mapping_token` | `text` |
+| Restore personal information (`unmask_pii`) | `text`, `mapping_token` | `restored_text` |
 
 ### Example chatflow
 
@@ -39,7 +39,7 @@ Start
   -> Mask personal information   (text = sys.query)
   -> LLM                         (user prompt = Mask.masked_text)
   -> Restore personal information (text = LLM.text, mapping_token = Mask.mapping_token)
-  -> Answer                      (Restore.text)
+  -> Answer                      (Restore.restored_text)
 ```
 
 Tips:

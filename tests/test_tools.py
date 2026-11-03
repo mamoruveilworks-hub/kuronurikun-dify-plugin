@@ -81,14 +81,28 @@ def test_unmask(calls):
     sent, replies = calls
     replies.append(FakeResponse(200, {"text": "山田太郎様、承知しました。"}))
     msgs = list(_tool(UnmaskPiiTool).invoke({"text": "[PERSON_1]様、承知しました。", "mapping_token": "pm1.tok"}))
-    assert _variables(msgs) == {"text": "山田太郎様、承知しました。"}
+    assert _variables(msgs) == {"restored_text": "山田太郎様、承知しました。"}
     assert sent[0]["json"] == {"text": "[PERSON_1]様、承知しました。", "mapping_token": "pm1.tok"}
 
 
 def test_unmask_without_token_returns_text_unchanged(calls):
     sent, _ = calls
     msgs = list(_tool(UnmaskPiiTool).invoke({"text": "abc", "mapping_token": ""}))
-    assert _variables(msgs) == {"text": "abc"} and sent == []
+    assert _variables(msgs) == {"restored_text": "abc"} and sent == []
+
+
+def test_unmask_strips_spaces_around_token(calls):
+    sent, replies = calls
+    replies.append(FakeResponse(200, {"text": "ok"}))
+    list(_tool(UnmaskPiiTool).invoke({"text": "[PERSON_1]", "mapping_token": " pm1.tok\n"}))
+    assert sent[0]["json"]["mapping_token"] == "pm1.tok"
+
+
+def test_unmask_wrong_variable_explains_without_request(calls):
+    sent, _ = calls
+    with pytest.raises(client.KuronurikunError, match="mapping_token variable of the mask node"):
+        list(_tool(UnmaskPiiTool).invoke({"text": "x", "mapping_token": "[PERSON_1]様の電話は"}))
+    assert sent == []
 
 
 @pytest.mark.parametrize("status,needle", [(401, "Invalid API key"), (403, "different API key"), (429, "limit")])

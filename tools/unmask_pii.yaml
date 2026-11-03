@@ -41,7 +41,7 @@ parameters:
 output_schema:
   type: object
   properties:
-    text:
+    restored_text:
       type: string
       description: Text with placeholders restored to the original values
 extra:
