@@ -11,6 +11,8 @@ BASE_URL = "https://kuronurikun.com"
 ENDPOINTS = {
     "/v1/mask": "https://kuronurikun.com/v1/mask",
     "/v1/unmask": "https://kuronurikun.com/v1/unmask",
+    # Local mode sends only the number of characters to this endpoint, never the text.
+    "/v1/usage": "https://kuronurikun.com/v1/usage",
 }
 TIMEOUT = (10, 60)  # (connect, read) seconds
 
@@ -36,7 +38,7 @@ def post(path: str, api_key: str, payload: dict[str, Any]) -> dict[str, Any]:
         response = requests.post(
             ENDPOINTS[path],
             json=payload,
-            headers={"X-API-Key": api_key, "User-Agent": "kuronurikun-dify-plugin/0.1.0"},
+            headers={"X-API-Key": api_key, "User-Agent": "kuronurikun-dify-plugin/0.2.0"},
             timeout=TIMEOUT,
         )
     except requests.RequestException as exc:

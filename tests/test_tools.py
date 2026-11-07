@@ -42,8 +42,9 @@ def calls(monkeypatch):
     return sent, replies
 
 
-def _tool(cls):
-    return cls(runtime=ToolRuntime(credentials={"api_key": "pmk_test"}, user_id="u", session_id="s"), session=None)
+def _tool(cls, credentials=None):
+    creds = {"api_key": "pmk_test"} if credentials is None else credentials
+    return cls(runtime=ToolRuntime(credentials=creds, user_id="u", session_id="s"), session=None)
 
 
 def _variables(messages):
@@ -116,3 +117,107 @@ def test_errors_are_readable(calls, status, needle):
 def test_parse_extra():
     assert parse_extra("age, Gender、UNKNOWN") == ["AGE", "GENDER"]
     assert parse_extra(None) == []
+
+
+# ---------------------------------------------------------------- local mode (text stays in Dify)
+
+LOCAL = {"mode": "local", "api_key": "pmk_test"}
+
+
+@pytest.fixture
+def usage_ok(calls):
+    """Every request in local mode must be /v1/usage with the character count only."""
+    sent, replies = calls
+    for _ in range(5):
+        replies.append(FakeResponse(200, {"allowed": True}))
+    yield sent
+    for request in sent:
+        assert request["url"] == "https://kuronurikun.com/v1/usage"
+        assert set(request["json"]) == {"characters"}
+
+
+def test_local_mask_and_unmask_round_trip(usage_ok):
+    text = "山田太郎様の電話は090-1234-5678です。山田様によろしく。"
+    out = _variables(list(_tool(MaskPiiTool, LOCAL).invoke({"text": text})))
+    assert out["masked_text"] == "[PERSON_1]様の電話は[PHONE_1]です。[PERSON_2]様によろしく。"
+    assert out["mapping_token"].startswith("pml1.") and out["entity_count"] >= 2
+    assert usage_ok == [{"url": "https://kuronurikun.com/v1/usage", "json": {"characters": len(text)},
+                         "headers": usage_ok[0]["headers"]}]
+    assert usage_ok[0]["headers"]["X-API-Key"] == "pmk_test"
+
+    answer = "[PERSON_1]様、[PHONE_1]へ折り返します。"
+    restored = _variables(list(_tool(UnmaskPiiTool, LOCAL).invoke(
+        {"text": answer, "mapping_token": " " + out["mapping_token"] + "\n"}
+    )))["restored_text"]
+    assert restored == "山田太郎様、090-1234-5678へ折り返します。"
+    assert len(usage_ok) == 1  # restoring is free and makes no request
+
+
+def test_local_json_output_has_no_original_values(usage_ok):
+    msgs = list(_tool(MaskPiiTool, LOCAL).invoke({"text": "山田太郎様の電話は090-1234-5678"}))
+    blobs = [m.message.json_object for m in msgs if getattr(m.message, "json_object", None) is not None]
+    assert blobs and "山田太郎" not in str(blobs) and "090-1234-5678" not in str(blobs)
+
+
+def test_local_block_style_has_no_token(usage_ok):
+    out = _variables(list(_tool(MaskPiiTool, LOCAL).invoke({"text": "電話は090-1234-5678", "style": "block"})))
+    assert "■" in out["masked_text"] and out["mapping_token"] == ""
+
+
+def test_local_extra_entities(usage_ok):
+    out = _variables(list(_tool(MaskPiiTool, LOCAL).invoke({"text": "山田太郎様（35歳）", "extra_entities": "age"})))
+    assert "35歳" not in out["masked_text"]
+
+
+def test_local_over_quota_stops_before_masking(calls):
+    sent, replies = calls
+    replies.append(FakeResponse(429, {"detail": "over"}))
+    with pytest.raises(client.KuronurikunError, match="limit"):
+        list(_tool(MaskPiiTool, LOCAL).invoke({"text": "山田太郎様"}))
+    assert sent[0]["json"] == {"characters": 5}
+
+
+def test_local_without_key_is_explained(calls):
+    sent, _ = calls
+    with pytest.raises(client.KuronurikunError, match="API key is not set"):
+        list(_tool(MaskPiiTool, {"mode": "local"}).invoke({"text": "山田太郎様"}))
+    assert sent == []
+
+
+def test_local_too_long_text_sends_nothing(calls):
+    sent, _ = calls
+    with pytest.raises(client.KuronurikunError, match="too long"):
+        list(_tool(MaskPiiTool, LOCAL).invoke({"text": "あ" * 100_001}))
+    assert sent == []
+
+
+def test_local_broken_token_is_explained(calls):
+    sent, _ = calls
+    with pytest.raises(client.KuronurikunError, match="broken"):
+        list(_tool(UnmaskPiiTool, LOCAL).invoke({"text": "x", "mapping_token": "pml1.%%%"}))
+    assert sent == []
+
+
+def test_api_token_still_restored_through_api_in_local_mode(calls):
+    # A token made in API mode (pm1.) is restored through the API even after switching to local mode.
+    sent, replies = calls
+    replies.append(FakeResponse(200, {"text": "ok"}))
+    list(_tool(UnmaskPiiTool, LOCAL).invoke({"text": "x", "mapping_token": "pm1.tok"}))
+    assert sent[0]["url"] == "https://kuronurikun.com/v1/unmask"
+
+
+def test_mode_of_keeps_old_installs_on_the_api():
+    from tools.local import mode_of
+
+    assert mode_of({"api_key": "pmk_x"}) == "api"  # installed with 0.1.0: no mode setting
+    assert mode_of({"mode": "local", "api_key": "pmk_x"}) == "local"
+    assert mode_of({"mode": "api", "api_key": "pmk_x"}) == "api"
+
+
+def test_provider_requires_key(calls):
+    from dify_plugin.errors.tool import ToolProviderCredentialValidationError
+
+    from provider.kuronurikun import KuronurikunProvider
+
+    with pytest.raises(ToolProviderCredentialValidationError):
+        KuronurikunProvider()._validate_credentials({"mode": "local"})

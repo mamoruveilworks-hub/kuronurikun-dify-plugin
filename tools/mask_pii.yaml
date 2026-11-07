@@ -79,7 +79,7 @@ output_schema:
       description: Text with personal information replaced
     mapping_token:
       type: string
-      description: Encrypted token used by "Restore personal information" (style=tag only, valid for 24 hours, same API key only)
+      description: Token for "Restore personal information" (style=tag only). It contains the original values, so never pass it to an LLM
     entity_count:
       type: integer
       description: Number of personal information items found

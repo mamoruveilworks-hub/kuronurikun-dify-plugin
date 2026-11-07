@@ -1,0 +1,31 @@
+Kuronuri-kun Dify Plugin License
+
+Copyright (c) 2026 Kuronuri-kun. All rights reserved except as stated below.
+
+The source code of this plugin is published so that you can review exactly what it does
+with your data. You may read, inspect, and audit it freely.
+
+You may install and use this plugin, in its unmodified form as distributed through the Dify
+Marketplace or this repository, with a valid Kuronuri-kun API key issued at
+https://kuronurikun.com, under the Kuronuri-kun Terms of Service
+(https://kuronurikun.com/legal/terms) and the plan that applies to that key.
+
+You may not:
+
+1. remove, disable, or work around the usage counting (the request to /v1/usage) or the
+   API key check, or use the plugin or any part of it without a valid API key;
+2. copy, redistribute, sublicense, or sell this plugin or any part of it (including the
+   detection engine in kuronuri_engine/), modified or not, except by linking to the
+   official repository or Marketplace listing;
+3. use any part of it to build a product or service that offers personal information
+   detection or masking.
+
+For other uses, such as running it without API access in a closed network, contact
+support@kuronurikun.com.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.

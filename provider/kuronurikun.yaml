@@ -14,6 +14,29 @@ identity:
     - utilities
     - productivity
 credentials_for_provider:
+  mode:
+    type: select
+    required: true
+    default: local
+    label:
+      en_US: Where to process text
+      ja_JP: 文章を処理する場所
+      zh_Hans: 文本处理位置
+    help:
+      en_US: '"Inside this Dify" never sends text outside; only the number of characters is sent to count usage. "Kuronuri-kun API" sends the text to kuronurikun.com.'
+      ja_JP: 「このDifyの中」は文章を外部に送りません（利用量を数えるため、文字数だけを送ります）。「黒塗りくんAPI」は文章を kuronurikun.com に送ります。
+      zh_Hans: “在此 Dify 内”不会将文本发送到外部（仅发送字符数用于计量）。“Kuronuri-kun API”会将文本发送到 kuronurikun.com。
+    options:
+      - value: local
+        label:
+          en_US: Inside this Dify (text never leaves; only character counts are sent)
+          ja_JP: このDifyの中（文章は送らず、文字数だけを送る）
+          zh_Hans: 在此 Dify 内（文本不出 Dify，仅发送字符数）
+      - value: api
+        label:
+          en_US: Kuronuri-kun API (kuronurikun.com)
+          ja_JP: 黒塗りくんAPI（kuronurikun.com）
+          zh_Hans: Kuronuri-kun API（kuronurikun.com）
   api_key:
     type: secret-input
     required: true
@@ -26,9 +49,9 @@ credentials_for_provider:
       ja_JP: pmk_...
       zh_Hans: pmk_...
     help:
-      en_US: Get a free API key (100,000 characters/month) at kuronurikun.com
-      ja_JP: kuronurikun.com で無料のAPIキー（月10万文字まで）を発行できます
-      zh_Hans: 在 kuronurikun.com 免费获取 API 密钥（每月 10 万字符）
+      en_US: Get a free API key (100,000 characters/month) at kuronurikun.com. In both modes, usage is counted by the number of characters masked
+      ja_JP: kuronurikun.com で無料のAPIキー（月10万文字まで）を発行できます。どちらの処理場所でも、伏せた文字数で利用量を数えます
+      zh_Hans: 在 kuronurikun.com 免费获取 API 密钥（每月 10 万字符）。两种模式都按遮蔽的字符数计量
     url: https://kuronurikun.com/#signup
 tools:
   - tools/mask_pii.yaml
